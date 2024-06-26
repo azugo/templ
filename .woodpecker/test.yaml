@@ -1,0 +1,18 @@
+when:
+  branch:
+    - main
+  event:
+    - pull_request
+
+matrix:
+  GO_VERSION:
+    - 1.22
+
+steps:
+  - name: test
+    image: golang:${GO_VERSION}
+    pull: true
+    environment:
+      - CGO_ENABLED=1
+    commands:
+      - go test -race ./...
