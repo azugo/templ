@@ -6,7 +6,7 @@ when:
 
 steps:
   - name: golangci-lint
-    image: golangci/golangci-lint:v1.57-alpine
+    image: golangci/golangci-lint:v1.60-alpine
     pull: true
     commands:
       - golangci-lint run --timeout 3m --out-format=checkstyle:golangci-lint.out,colored-line-number
