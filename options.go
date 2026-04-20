@@ -1,3 +1,4 @@
+// Package templ provides helpers for rendering templ components in Azugo applications.
 package templ
 
 type options struct {

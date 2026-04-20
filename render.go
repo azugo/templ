@@ -8,6 +8,7 @@ import (
 	"github.com/a-h/templ"
 )
 
+// Option configures rendering behaviour.
 type Option interface {
 	apply(opt *options)
 }
@@ -20,6 +21,7 @@ var bufferPool = sync.Pool{
 
 func renderBuffered(ctx *azugo.Context, component templ.Component, contentType string) {
 	buf, _ := bufferPool.Get().(*bytes.Buffer)
+
 	defer func() {
 		buf.Reset()
 		bufferPool.Put(buf)

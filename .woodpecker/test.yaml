@@ -6,8 +6,8 @@ when:
 
 matrix:
   GO_VERSION:
-    - 1.24
     - 1.25
+    - 1.26
 
 steps:
   - name: test
@@ -16,4 +16,4 @@ steps:
     environment:
       CGO_ENABLED: 0
     commands:
-      - go test ./...
+      - go test -v ./...
