@@ -3,14 +3,14 @@ module azugo.io/templ
 go 1.25.0
 
 require (
-	azugo.io/azugo v0.32.0
+	azugo.io/azugo v0.33.0
 	github.com/a-h/templ v0.3.1020
 	github.com/go-quicktest/qt v1.102.0
 	github.com/valyala/fasthttp v1.71.0
 )
 
 require (
-	azugo.io/core v0.32.0 // indirect
+	azugo.io/core v0.33.0 // indirect
 	github.com/VictoriaMetrics/metrics v1.43.2 // indirect
 	github.com/andybalholm/brotli v1.2.1 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
@@ -20,7 +20,7 @@ require (
 	github.com/gabriel-vasile/mimetype v1.4.13 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect
-	github.com/go-playground/validator/v10 v10.30.2 // indirect
+	github.com/go-playground/validator/v10 v10.30.3 // indirect
 	github.com/go-viper/mapstructure/v2 v2.5.0 // indirect
 	github.com/goccy/go-json v0.10.6 // indirect
 	github.com/google/go-cmp v0.7.0 // indirect
@@ -31,12 +31,12 @@ require (
 	github.com/lafriks/http2 v0.5.0 // indirect
 	github.com/lafriks/pkcs8 v1.2.3 // indirect
 	github.com/leodido/go-urn v1.4.0 // indirect
-	github.com/mattn/go-colorable v0.1.14 // indirect
+	github.com/mattn/go-colorable v0.1.15 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/oklog/ulid/v2 v2.1.1 // indirect
 	github.com/pelletier/go-toml/v2 v2.2.4 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
-	github.com/redis/go-redis/v9 v9.20.0 // indirect
+	github.com/redis/go-redis/v9 v9.20.1 // indirect
 	github.com/rogpeppe/go-internal v1.14.1 // indirect
 	github.com/sagikazarmark/locafero v0.11.0 // indirect
 	github.com/sourcegraph/conc v0.3.1-0.20240121214520-5f936abd7ae8 // indirect
