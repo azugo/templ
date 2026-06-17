@@ -3,14 +3,14 @@ module azugo.io/templ
 go 1.25.0
 
 require (
-	azugo.io/azugo v0.33.0
+	azugo.io/azugo v0.33.1
 	github.com/a-h/templ v0.3.1020
 	github.com/go-quicktest/qt v1.102.0
 	github.com/valyala/fasthttp v1.71.0
 )
 
 require (
-	azugo.io/core v0.33.0 // indirect
+	azugo.io/core v0.33.1 // indirect
 	github.com/VictoriaMetrics/metrics v1.43.2 // indirect
 	github.com/andybalholm/brotli v1.2.1 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
