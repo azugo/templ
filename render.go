@@ -2,6 +2,7 @@ package templ
 
 import (
 	"bytes"
+	"fmt"
 	"sync"
 
 	"azugo.io/azugo"
@@ -20,6 +21,14 @@ func observeRender(ctx *azugo.Context, name string) func(error) {
 	}
 
 	return inst.Observe(ctx, InstrumentationRender, name)
+}
+
+func renderError(name string, err error) error {
+	if name == "" {
+		return err
+	}
+
+	return fmt.Errorf("render %q: %w", name, err)
 }
 
 // Option configures rendering behaviour.
@@ -47,7 +56,7 @@ func renderBuffered(ctx *azugo.Context, component templ.Component, contentType, 
 	finish(err)
 
 	if err != nil {
-		ctx.Error(err)
+		ctx.Error(renderError(name, err))
 
 		return
 	}
@@ -67,7 +76,7 @@ func renderStreamed(ctx *azugo.Context, component templ.Component, contentType, 
 	finish(err)
 
 	if err != nil {
-		ctx.Error(err)
+		ctx.Error(renderError(name, err))
 	}
 }
 

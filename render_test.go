@@ -43,6 +43,18 @@ func (r *fakeInstr) observe(_ context.Context, op string, args ...any) func(erro
 	}
 }
 
+func TestRenderError(t *testing.T) {
+	base := errors.New("boom")
+
+	// No name: the original error is returned unchanged.
+	qt.Check(t, qt.Equals(renderError("", base), base))
+
+	// Named: wrapped with the name, and errors.Is still reaches the original.
+	wrapped := renderError("home.page", base)
+	qt.Check(t, qt.ErrorIs(wrapped, base))
+	qt.Check(t, qt.StringContains(wrapped.Error(), "home.page"))
+}
+
 func TestRenderInstrumentation(t *testing.T) {
 	ok := templ.ComponentFunc(func(_ context.Context, w io.Writer) error {
 		_, err := io.WriteString(w, "Hello")
