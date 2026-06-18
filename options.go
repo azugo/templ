@@ -4,6 +4,7 @@ package templ
 type options struct {
 	Streaming   bool
 	ContentType string
+	Name        string
 }
 
 // Streaming render directly to response instead of buffering.
@@ -25,4 +26,11 @@ type ContentType string
 
 func (c ContentType) apply(opt *options) {
 	opt.ContentType = string(c)
+}
+
+// Name of the component to report to instrumentation.
+type Name string
+
+func (n Name) apply(opt *options) {
+	opt.Name = string(n)
 }
