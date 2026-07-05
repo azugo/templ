@@ -6,6 +6,7 @@ import (
 	"sync"
 
 	"azugo.io/azugo"
+	"azugo.io/core/http"
 	"github.com/a-h/templ"
 )
 
@@ -61,12 +62,12 @@ func renderBuffered(ctx *azugo.Context, component templ.Component, contentType, 
 		return
 	}
 
-	ctx.Header.Set("Content-Type", contentType)
+	ctx.Header.Set(http.HeaderContentType, contentType)
 	ctx.Raw(buf.Bytes())
 }
 
 func renderStreamed(ctx *azugo.Context, component templ.Component, contentType, name string) {
-	ctx.Header.Set("Content-Type", contentType)
+	ctx.Header.Set(http.HeaderContentType, contentType)
 
 	wr := ctx.Context().Response.BodyWriter()
 

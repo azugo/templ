@@ -9,6 +9,7 @@ import (
 
 	"azugo.io/azugo"
 	"azugo.io/azugo/server"
+	"azugo.io/core/http"
 	"github.com/a-h/templ"
 	"github.com/go-quicktest/qt"
 	"github.com/valyala/fasthttp"
@@ -142,7 +143,7 @@ func TestRender(t *testing.T) {
 		{
 			name:             "handlers return OK by default",
 			input:            hello,
-			expectedStatus:   fasthttp.StatusOK,
+			expectedStatus:   http.StatusOK,
 			expectedMIMEType: "text/html; charset=utf-8",
 			expectedBody:     "Hello",
 		},
@@ -150,14 +151,14 @@ func TestRender(t *testing.T) {
 			name:             "handlers return OK by default",
 			input:            hello,
 			opts:             []Option{Streaming()},
-			expectedStatus:   fasthttp.StatusOK,
+			expectedStatus:   http.StatusOK,
 			expectedMIMEType: "text/html; charset=utf-8",
 			expectedBody:     "Hello",
 		},
 		{
 			name:             "handlers return OK by default",
 			input:            templ.Raw(`♠ ‘ &spades; &#8216;`),
-			expectedStatus:   fasthttp.StatusOK,
+			expectedStatus:   http.StatusOK,
 			expectedMIMEType: "text/html; charset=utf-8",
 			expectedBody:     "♠ ‘ &spades; &#8216;",
 		},
@@ -165,14 +166,14 @@ func TestRender(t *testing.T) {
 			name:             "handlers can be configured to return an alternative status code and content type",
 			input:            hello,
 			opts:             []Option{ContentType("text/csv")},
-			expectedStatus:   fasthttp.StatusOK,
+			expectedStatus:   http.StatusOK,
 			expectedMIMEType: "text/csv",
 			expectedBody:     "Hello",
 		},
 		{
 			name:             "handlers that fail return a 500 error",
 			input:            errorComponent,
-			expectedStatus:   fasthttp.StatusInternalServerError,
+			expectedStatus:   http.StatusInternalServerError,
 			expectedMIMEType: "text/plain; charset=utf-8",
 			expectedBody:     "",
 		},
