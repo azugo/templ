@@ -3,7 +3,7 @@ module azugo.io/templ
 go 1.25.0
 
 require (
-	azugo.io/azugo v0.35.0
+	azugo.io/azugo v0.35.1
 	azugo.io/core v0.35.1
 	github.com/a-h/templ v0.3.1020
 	github.com/go-quicktest/qt v1.102.0
@@ -28,7 +28,7 @@ require (
 	github.com/klauspost/compress v1.18.6 // indirect
 	github.com/kr/pretty v0.3.1 // indirect
 	github.com/kr/text v0.2.0 // indirect
-	github.com/lafriks/http2 v0.5.0 // indirect
+	github.com/lafriks/http2 v0.6.1 // indirect
 	github.com/lafriks/pkcs8 v1.2.3 // indirect
 	github.com/leodido/go-urn v1.4.0 // indirect
 	github.com/mattn/go-colorable v0.1.15 // indirect
