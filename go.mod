@@ -3,8 +3,8 @@ module azugo.io/templ
 go 1.26.0
 
 require (
-	azugo.io/azugo v0.39.0
-	azugo.io/core v0.39.0
+	azugo.io/azugo v0.39.3
+	azugo.io/core v0.39.2
 	github.com/a-h/templ v0.3.1020
 	github.com/go-quicktest/qt v1.102.0
 	github.com/valyala/fasthttp v1.74.0
