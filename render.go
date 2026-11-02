@@ -1,9 +1,7 @@
 package templ
 
 import (
-	"bytes"
 	"fmt"
-	"sync"
 
 	"azugo.io/azugo"
 	"azugo.io/core/http"
@@ -37,50 +35,6 @@ type Option interface {
 	apply(opt *options)
 }
 
-var bufferPool = sync.Pool{
-	New: func() any {
-		return new(bytes.Buffer)
-	},
-}
-
-func renderBuffered(ctx *azugo.Context, component templ.Component, contentType, name string) {
-	buf, _ := bufferPool.Get().(*bytes.Buffer)
-
-	defer func() {
-		buf.Reset()
-		bufferPool.Put(buf)
-	}()
-
-	finish := observeRender(ctx, name)
-
-	err := component.Render(ctx, buf)
-	finish(err)
-
-	if err != nil {
-		ctx.Error(renderError(name, err))
-
-		return
-	}
-
-	ctx.Header.Set(http.HeaderContentType, contentType)
-	ctx.Raw(buf.Bytes())
-}
-
-func renderStreamed(ctx *azugo.Context, component templ.Component, contentType, name string) {
-	ctx.Header.Set(http.HeaderContentType, contentType)
-
-	wr := ctx.Context().Response.BodyWriter()
-
-	finish := observeRender(ctx, name)
-
-	err := component.Render(ctx, wr)
-	finish(err)
-
-	if err != nil {
-		ctx.Error(renderError(name, err))
-	}
-}
-
 // Render a component to the response.
 func Render(ctx *azugo.Context, component templ.Component, opts ...Option) {
 	o := &options{
@@ -91,11 +45,19 @@ func Render(ctx *azugo.Context, component templ.Component, opts ...Option) {
 		opt.apply(o)
 	}
 
-	if o.Streaming {
-		renderStreamed(ctx, component, o.ContentType, o.Name)
+	ctx.Response().ResetBody()
+
+	finish := observeRender(ctx, o.Name)
+
+	err := component.Render(ctx, ctx.Response().BodyWriter())
+	finish(err)
+
+	if err != nil {
+		ctx.Response().ResetBody()
+		ctx.Error(renderError(o.Name, err))
 
 		return
 	}
 
-	renderBuffered(ctx, component, o.ContentType, o.Name)
+	ctx.Header.Set(http.HeaderContentType, o.ContentType)
 }

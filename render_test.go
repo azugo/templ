@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 	"io"
+	"strconv"
+	"strings"
 	"sync"
 	"testing"
 
@@ -73,11 +75,9 @@ func TestRenderInstrumentation(t *testing.T) {
 		wantError bool
 		wantName  string
 	}{
-		{name: "buffered", input: ok},
-		{name: "streamed", input: ok, opts: []Option{Streaming()}},
+		{name: "plain", input: ok},
 		{name: "error", input: fails, wantError: true},
 		{name: "named", input: ok, opts: []Option{Name("home.page")}, wantName: "home.page"},
-		{name: "named streamed", input: ok, opts: []Option{Name("home.page"), Streaming()}, wantName: "home.page"},
 	}
 
 	for _, tt := range tests {
@@ -149,14 +149,6 @@ func TestRender(t *testing.T) {
 		},
 		{
 			name:             "handlers return OK by default",
-			input:            hello,
-			opts:             []Option{Streaming()},
-			expectedStatus:   http.StatusOK,
-			expectedMIMEType: "text/html; charset=utf-8",
-			expectedBody:     "Hello",
-		},
-		{
-			name:             "handlers return OK by default",
 			input:            templ.Raw(`♠ ‘ &spades; &#8216;`),
 			expectedStatus:   http.StatusOK,
 			expectedMIMEType: "text/html; charset=utf-8",
@@ -207,4 +199,82 @@ func TestRender(t *testing.T) {
 			qt.Assert(t, qt.Equals(string(resp.Body()), tt.expectedBody))
 		})
 	}
+}
+
+func TestRenderKeepsEachResponseOwnBody(t *testing.T) {
+	t.Setenv("METRICS_ENABLED", "false")
+
+	a, err := server.New(nil, server.Options{AppName: "Test", AppVer: "1.0.0"})
+	qt.Assert(t, qt.IsNil(err))
+
+	app := azugo.NewTestApp(a)
+	app.Start(t)
+	defer app.Stop()
+
+	app.Get("/", func(ctx *azugo.Context) {
+		v := ctx.Query.StringOptional("v")
+		Render(ctx, templ.ComponentFunc(func(_ context.Context, w io.Writer) error {
+			_, err := io.WriteString(w, strings.Repeat(*v, 4096))
+
+			return err
+		}))
+	})
+
+	var (
+		wg  sync.WaitGroup
+		mu  sync.Mutex
+		bad int
+	)
+
+	for g := range 16 {
+		wg.Go(func() {
+			c := app.TestClient()
+
+			for n := range 200 {
+				v := strconv.Itoa((g*200 + n) % 10)
+
+				resp, err := c.Get("/", c.WithQuery(map[string]any{"v": v}))
+				if err != nil {
+					t.Error(err)
+
+					return
+				}
+
+				if string(resp.Body()) != strings.Repeat(v, 4096) {
+					mu.Lock()
+					bad++
+					mu.Unlock()
+				}
+
+				fasthttp.ReleaseResponse(resp)
+			}
+		})
+	}
+
+	wg.Wait()
+
+	qt.Check(t, qt.Equals(bad, 0))
+}
+
+func TestRenderReplacesEarlierBody(t *testing.T) {
+	t.Setenv("METRICS_ENABLED", "false")
+
+	a, err := server.New(nil, server.Options{AppName: "Test", AppVer: "1.0.0"})
+	qt.Assert(t, qt.IsNil(err))
+
+	app := azugo.NewTestApp(a)
+	app.Start(t)
+	defer app.Stop()
+
+	app.Get("/", func(ctx *azugo.Context) {
+		ctx.Text("earlier")
+		Render(ctx, templ.Raw("Hello"))
+	})
+
+	resp, err := app.TestClient().Get("/")
+	defer fasthttp.ReleaseResponse(resp)
+
+	qt.Assert(t, qt.IsNil(err))
+	qt.Check(t, qt.Equals(string(resp.Body()), "Hello"))
+	qt.Check(t, qt.Equals(string(resp.Header.ContentType()), "text/html; charset=utf-8"))
 }
