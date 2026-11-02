@@ -49,7 +49,13 @@ func Render(ctx *azugo.Context, component templ.Component, opts ...Option) {
 
 	finish := observeRender(ctx, o.Name)
 
-	err := component.Render(ctx, ctx.Response().BodyWriter())
+	var err error
+	if o.Fragmented {
+		err = templ.RenderFragments(ctx, ctx.Response().BodyWriter(), component, o.Fragments...)
+	} else {
+		err = component.Render(ctx, ctx.Response().BodyWriter())
+	}
+
 	finish(err)
 
 	if err != nil {

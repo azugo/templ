@@ -278,3 +278,63 @@ func TestRenderReplacesEarlierBody(t *testing.T) {
 	qt.Check(t, qt.Equals(string(resp.Body()), "Hello"))
 	qt.Check(t, qt.Equals(string(resp.Header.ContentType()), "text/html; charset=utf-8"))
 }
+
+func TestRenderFragments(t *testing.T) {
+	t.Setenv("METRICS_ENABLED", "false")
+
+	a, err := server.New(nil, server.Options{AppName: "Test", AppVer: "1.0.0"})
+	qt.Assert(t, qt.IsNil(err))
+
+	app := azugo.NewTestApp(a)
+	app.Start(t)
+	defer app.Stop()
+
+	fragment := func(ctx context.Context, w io.Writer, id, body string) error {
+		return templ.Fragment(id).Render(templ.WithChildren(ctx, templ.Raw(body)), w)
+	}
+
+	page := templ.ComponentFunc(func(ctx context.Context, w io.Writer) error {
+		if _, err := io.WriteString(w, "<main>"); err != nil {
+			return err
+		}
+
+		if err := fragment(ctx, w, "list", "<ul></ul>"); err != nil {
+			return err
+		}
+
+		if err := fragment(ctx, w, "count", "<b>0</b>"); err != nil {
+			return err
+		}
+
+		_, err := io.WriteString(w, "</main>")
+
+		return err
+	})
+
+	app.Get("/full", func(ctx *azugo.Context) {
+		Render(ctx, page)
+	})
+	app.Get("/list", func(ctx *azugo.Context) {
+		Render(ctx, page, Fragments("list"))
+	})
+	app.Get("/both", func(ctx *azugo.Context) {
+		Render(ctx, page, Fragments("list", "count"))
+	})
+	app.Get("/none", func(ctx *azugo.Context) {
+		Render(ctx, page, Fragments())
+	})
+
+	for path, want := range map[string]string{
+		"/full": "<main><ul></ul><b>0</b></main>",
+		"/list": "<ul></ul>",
+		"/both": "<ul></ul><b>0</b>",
+		"/none": "",
+	} {
+		resp, err := app.TestClient().Get(path)
+		qt.Assert(t, qt.IsNil(err))
+		qt.Check(t, qt.Equals(resp.StatusCode(), http.StatusOK), qt.Commentf(path))
+		qt.Check(t, qt.Equals(string(resp.Body()), want), qt.Commentf(path))
+		qt.Check(t, qt.Equals(string(resp.Header.ContentType()), "text/html; charset=utf-8"), qt.Commentf(path))
+		fasthttp.ReleaseResponse(resp)
+	}
+}
